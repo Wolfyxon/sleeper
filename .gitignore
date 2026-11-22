@@ -1,2 +1,4 @@
+*.sig
+
 compile_flags.txt
 sleeper
