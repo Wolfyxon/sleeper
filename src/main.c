@@ -237,12 +237,12 @@ void add_sleep_stage(AppContext *ctx, SleepStage stage) {
 void init_default_sleep_stages(AppContext *ctx) {
     add_sleep_stage(ctx, (SleepStage){
         .command = "brightnessctl --save set 1%",
-        .time = 1000
+        .time = 1000 * 60 * 1
     });
 
     add_sleep_stage(ctx, (SleepStage){
         .command = "xset s activate",
-        .time = 5000
+        .time = 1000 * 60 * 2
     });
     
     ctx->wakeup_stage.valid = true;
