@@ -149,6 +149,18 @@ void main_loop(AppContext *ctx) {
         return;
     }
 
+    if(x11_is_screen_off(&ctx->x11)) {
+        return;
+    }
+
+    if(x11_has_screensaver(&ctx->x11)) {
+        return;
+    }
+
+    if(x11_has_lockscreen(&ctx->x11)) {
+        return;
+    }
+    
     millis_t now = get_time_ms();
 
     if(ctx->current_stage == NULL) {
