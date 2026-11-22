@@ -33,8 +33,34 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void parse_args(AppContext *ctx, int agrc, char **argv) {
+void print_help() {
+    puts("Usage: sleeper [OPTION]...");
+    puts("");
+    puts("Available options:");
+    puts("  --help:     Shows this help");
+    puts("  --version:  Shows the program version");
+    puts("");
+    puts("Source code and bugs:");
+    puts("https://github.com/Wolfyxon/sleeper");
+}
 
+void parse_args(AppContext *ctx, int argc, char **argv) {
+    for(size_t i = 1; i < argc; i++) {
+        char *arg = argv[i];
+
+        if(streq(arg, "--help")) {
+            print_help();
+            exit(0);
+        }
+
+        if(streq(arg, "--version")) {
+            printf("sleeper v%s\n", PROGRAM_VERSION); // it's not a double, shut up clangd
+            exit(0);
+        }
+        
+        fprintf(stderr, "error: Unrecognized argument '%s'\n", arg);
+        exit(1);
+    }
 }
 
 void main_loop(AppContext *ctx) {

@@ -12,7 +12,8 @@
 #define FRAME_TIME 8000
 
 int main(int argc, char **argv);
-void parse_args(AppContext *ctx, int agrc, char **argv);
+void parse_args(AppContext *ctx, int argc, char **argv);
+void print_help();
 void main_loop(AppContext *ctx);
 
 void timing_out(AppContext *ctx);
