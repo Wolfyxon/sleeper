@@ -4,7 +4,15 @@ const char *VIDEO_PATTERNS[] = {
     ".*.mp4", ".*.mov", ".*.webm",
     ".*.mkv", ".*.mpv",".*.ogv",
     ".*.avi", ".*.flv", ".*.vob",
-    "https://.*/watch.*"
+    "https://.*/watch.*",
+    "https://.*netflix.com/.*",
+    "https://.*hbomax.com/.*",
+    "https://.*primevideo.com/.*",
+    "https://.*hulu.com/.*",
+    "https://.*cda.pl/.*",
+    "https://.*twitch.tv/.*",
+    "https://.*kick.com/.*",
+    "https://.*crunchyroll.com/.*"
 };
 
 bool has_blocking_media_player() {
