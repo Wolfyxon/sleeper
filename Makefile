@@ -24,7 +24,7 @@ clean:
 	rm -f $(OUT_NAME)
 
 run: build
-	./$(OUT_NAME)
+	./$(OUT_NAME) --verbose
 
 dev: $(FLAGS_TXT_FILE)
 
