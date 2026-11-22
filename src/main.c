@@ -70,6 +70,7 @@ void print_help() {
     puts("  --no-video-check:                       Do not check for active video players (via playerctl)");
     puts("  --no-lockscreen-check:                  Do not check for an active lockscreen app");
     puts("  --no-screensaver-check:                 Do not check for an active screensaver app");
+    puts("  --check-fullscreen:                     Check for fullscreen apps");
     puts("  --stage: <seconds> <STAGE OPTION>...  : Adds a sleep stage.");
     puts("  --wakeup: <seconds> <STAGE OPTION>... : Adds a wakeup stage.");
     puts("");
@@ -111,6 +112,11 @@ void parse_args(AppContext *ctx, int argc, char **argv) {
 
         if(streq(arg, "--no-screensaver-check")) {
             ctx->no_screensaver_check = true;
+            continue;
+        }
+
+        if(streq(arg, "--check-fullscreen")) {
+            ctx->check_fullscreen = true;
             continue;
         }
 
@@ -214,6 +220,11 @@ void timing_out(AppContext *ctx) {
     }
 
     if(!ctx->no_lockscreen_check && x11_has_lockscreen(&ctx->x11)) {
+        dry_interacted(ctx);
+        return;
+    }
+
+    if(ctx->check_fullscreen && x11_has_fullscreen(&ctx->x11)) {
         dry_interacted(ctx);
         return;
     }

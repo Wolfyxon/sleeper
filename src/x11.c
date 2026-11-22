@@ -90,6 +90,10 @@ bool x11_has_screensaver(X11Context *ctx) {
     return res;
 }
 
+bool x11_attributes_are_fullscreen(XWindowAttributes *attr, XWindowAttributes *root_attr) {
+    return attr->height == root_attr->height && attr->width == root_attr->width;
+}
+
 bool x11_has_lockscreen(X11Context *ctx) {
     Window root = XDefaultRootWindow(ctx->disp);
     Window parent = {0};
@@ -141,13 +145,69 @@ bool x11_has_lockscreen(X11Context *ctx) {
             continue;
         } 
 
-        // Fullscreen check
-        if(attr.height != root_attr.height && attr.width != root_attr.width) {
+        if(!x11_attributes_are_fullscreen(&attr, &root_attr)) {
             continue;
         }
 
         XFree(windows);
         return true;
+    }
+
+    XFree(windows);
+    return false;
+}
+
+bool x11_has_fullscreen(X11Context *ctx) {
+    Window root = XDefaultRootWindow(ctx->disp);
+    Window parent = {0};
+
+    Window *windows = NULL;
+    unsigned int windows_len = 0;
+
+    int status = XQueryTree(
+        ctx->disp, 
+        root,
+        &root, // root
+        &parent,  // parent
+        &windows, 
+        &windows_len
+    );
+    
+    if(status == 0) {
+        fprintf(stderr, "error: Failed to list windows.\n");
+        return false;
+    }
+
+    if(windows == NULL) {
+        fprintf(stderr, "error: Failed to list windows. Array is NULL.\n");
+        return false;
+    }
+
+    XWindowAttributes root_attr = {0};
+
+    if(XGetWindowAttributes(ctx->disp, root, &root_attr) == 0) {
+        fprintf(stderr, "error: Failed to get attributes of root window\n");
+        return false;
+    }
+
+    for(size_t i = 0; i < windows_len; i++) {
+        Window window = windows[i];
+        XWindowAttributes attr = {0};
+
+        int attr_status = XGetWindowAttributes(ctx->disp, window, &attr);
+        
+        if(attr_status == 0) {
+            continue;
+        }
+
+        if(attr.map_state != IsViewable) {
+            continue;
+        }
+
+        if(x11_attributes_are_fullscreen(&attr, &root_attr)) {
+            XFree(windows);
+            return true;
+        }
     }
 
     XFree(windows);

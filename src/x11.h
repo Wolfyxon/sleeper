@@ -14,5 +14,7 @@
 void x11_init(X11Context *ctx);
 bool x11_has_interacted(X11Context *ctx);
 bool x11_has_screensaver(X11Context *ctx);
+bool x11_attributes_are_fullscreen(XWindowAttributes *attr, XWindowAttributes *root_attr);
 bool x11_has_lockscreen(X11Context *ctx);
+bool x11_has_fullscreen(X11Context *ctx);
 bool x11_is_screen_off(X11Context *ctx);
