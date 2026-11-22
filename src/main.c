@@ -214,6 +214,11 @@ void timing_out(AppContext *ctx) {
         return;
     }
 
+    if(!ctx->no_video_check && has_blocking_media_player()) {
+        dry_interacted(ctx);
+        return;
+    }
+
     if(!ctx->no_screensaver_check && x11_has_screensaver(&ctx->x11)) {
         dry_interacted(ctx);
         return;
@@ -225,11 +230,6 @@ void timing_out(AppContext *ctx) {
     }
 
     if(ctx->check_fullscreen && x11_has_fullscreen(&ctx->x11)) {
-        dry_interacted(ctx);
-        return;
-    }
-
-    if(!ctx->no_video_check && has_blocking_media_player()) {
         dry_interacted(ctx);
         return;
     }
