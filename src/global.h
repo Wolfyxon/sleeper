@@ -21,6 +21,9 @@ typedef struct {
 typedef struct {
     bool verbose;
     bool no_exec;
+    bool no_video_check;
+    bool no_lockscreen_check;
+    bool no_screensaver_check;
 
     X11Context x11;
     millis_t last_interaction;

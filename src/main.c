@@ -65,6 +65,9 @@ void print_help() {
     puts("  --help:                                 Shows this help.");
     puts("  --version:                              Shows the program version.");
     puts("  --no-exec:                              Do not execute any commands, only say what would be done.");
+    puts("  --no-video-check:                       Do not check for active video players (via playerctl)");
+    puts("  --no-lockscreen-check:                  Do not check for an active lockscreen app");
+    puts("  --no-screensaver-check:                 Do not check for an active screensaver app");
     puts("  --stage: <seconds> <STAGE OPTION>...  : Adds a sleep stage.");
     puts("  --wakeup: <seconds> <STAGE OPTION>... : Adds a wakeup stage.");
     puts("");
@@ -91,6 +94,21 @@ void parse_args(AppContext *ctx, int argc, char **argv) {
 
         if(streq(arg, "--no-exec")) {
             ctx->no_exec = true;
+            continue;
+        }
+
+        if(streq(arg, "--no-video-check")) {
+            ctx->no_video_check = true;
+            continue;
+        }
+
+        if(streq(arg, "--no-lockscreen-check")) {
+            ctx->no_lockscreen_check = true;
+            continue;
+        }
+
+        if(streq(arg, "--no-screensaver-check")) {
+            ctx->no_screensaver_check = true;
             continue;
         }
 
@@ -171,11 +189,11 @@ void main_loop(AppContext *ctx) {
         return;
     }
 
-    if(x11_has_screensaver(&ctx->x11)) {
+    if(!ctx->no_screensaver_check && x11_has_screensaver(&ctx->x11)) {
         return;
     }
 
-    if(x11_has_lockscreen(&ctx->x11)) {
+    if(!ctx->no_lockscreen_check && x11_has_lockscreen(&ctx->x11)) {
         return;
     }
 
@@ -195,7 +213,7 @@ void main_loop(AppContext *ctx) {
 }
 
 void timing_out(AppContext *ctx) {
-    if(has_blocking_media_player()) {
+    if(!ctx->no_video_check && has_blocking_media_player()) {
         interacted(ctx);
         return;
     }
