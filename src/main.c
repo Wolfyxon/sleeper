@@ -21,7 +21,8 @@ int main(int argc, char **argv) {
     }
 
     qsort(ctx.sleep_stages, ctx.sleep_stages_len, sizeof(SleepStage), _sort_compare_stages);
-    
+    ctx.last_stage = &ctx.wakeup_stage;
+
     x11_init(&ctx.x11);
 
     while(1) {
@@ -53,9 +54,18 @@ void main_loop(AppContext *ctx) {
     }
     
     if(now >= ctx->last_interaction + ctx->current_stage->time && ctx->last_stage != ctx->current_stage) {
-        exec_stage(ctx, ctx->current_stage);
-        ctx->current_stage = get_next_sleep_stage(ctx);
+        timing_out(ctx);
     }
+}
+
+void timing_out(AppContext *ctx) {
+    if(has_blocking_media_player()) {
+        interacted(ctx);
+        return;
+    }
+
+    exec_stage(ctx, ctx->current_stage);
+    ctx->current_stage = get_next_sleep_stage(ctx);
 }
 
 void interacted(AppContext *ctx) {

@@ -15,6 +15,7 @@ int main(int argc, char **argv);
 void parse_args(AppContext *ctx, int agrc, char **argv);
 void main_loop(AppContext *ctx);
 
+void timing_out(AppContext *ctx);
 void interacted(AppContext *ctx);
 
 void exec_stage(AppContext *ctx, SleepStage *stage);
