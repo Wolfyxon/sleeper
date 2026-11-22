@@ -15,8 +15,8 @@ typedef struct {
 typedef struct {
     millis_t time;
     char *command;
-}
-SleepStage;
+    bool valid;
+} SleepStage;
 
 typedef struct {
     bool verbose;
