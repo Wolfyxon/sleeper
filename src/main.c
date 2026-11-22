@@ -39,6 +39,7 @@ void print_help() {
     puts("Available options:");
     puts("  --help:     Shows this help");
     puts("  --version:  Shows the program version");
+    puts("  --no-exec:  Do not execute any commands, only say what would be done.");
     puts("");
     puts("Source code and bugs:");
     puts("https://github.com/Wolfyxon/sleeper");
@@ -56,6 +57,16 @@ void parse_args(AppContext *ctx, int argc, char **argv) {
         if(streq(arg, "--version")) {
             printf("sleeper v%s\n", PROGRAM_VERSION); // it's not a double, shut up clangd
             exit(0);
+        }
+
+        if(streq(arg, "--no-exec")) {
+            ctx->no_exec = true;
+            continue;
+        }
+
+        if(streq(arg, "--verbose")) {
+            ctx->verbose = true;
+            continue;
         }
         
         fprintf(stderr, "error: Unrecognized argument '%s'\n", arg);
@@ -98,7 +109,9 @@ void interacted(AppContext *ctx) {
     ctx->last_interaction = get_time_ms();
 
     if(ctx->last_stage != &ctx->wakeup_stage) {
-        puts("Wakeup");
+        if(ctx->verbose) {
+            puts("Wakeup");
+        }
 
         exec_stage(ctx, &ctx->wakeup_stage);
         ctx->current_stage = NULL;
@@ -106,9 +119,17 @@ void interacted(AppContext *ctx) {
 }
 
 void exec_stage(AppContext *ctx, SleepStage *stage) {
-    printf("Executing stage of time %ld\n", stage->time);
-
     ctx->last_stage = stage;
+
+    if(ctx->no_exec || ctx->verbose) {
+        printf("Executing stage of time %ld command: %s\n", stage->time, stage->command);
+    }
+
+    if(ctx->no_exec) {
+        return;
+    }
+
+    system(stage->command);
 }
 
 void add_sleep_stage(AppContext *ctx, SleepStage stage) {
@@ -136,7 +157,6 @@ SleepStage *get_next_sleep_stage(AppContext *ctx) {
         if(now < ctx->last_interaction + stage->time) {
             return stage;
         }
-
     }
 
     return NULL;

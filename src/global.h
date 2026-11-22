@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <X11/Xlib.h>
 
 #include "utils.h"
@@ -18,6 +19,9 @@ typedef struct {
 SleepStage;
 
 typedef struct {
+    bool verbose;
+    bool no_exec;
+
     X11Context x11;
     millis_t last_interaction;
     SleepStage wakeup_stage;
