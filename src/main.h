@@ -13,6 +13,7 @@
 
 int main(int argc, char **argv);
 void parse_args(AppContext *ctx, int argc, char **argv);
+void process_stage_args(SleepStage *stage, size_t *i, int argc, char **argv);
 void print_help();
 void main_loop(AppContext *ctx);
 

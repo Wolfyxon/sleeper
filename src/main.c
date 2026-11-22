@@ -6,8 +6,14 @@ int main(int argc, char **argv) {
     #endif
 
     AppContext ctx = {0};
+    
     ctx.sleep_stages = malloc(0);
     ctx.last_interaction = get_time_ms();
+
+    ctx.wakeup_stage = (SleepStage){
+        .command = "brightnessctl --restore",
+        .valid = false
+    };
 
     if(ctx.sleep_stages == NULL) {
         fprintf(stderr, "error: Failed to allocate memory for sleep stages\n");
@@ -17,7 +23,13 @@ int main(int argc, char **argv) {
     parse_args(&ctx, argc, argv);
 
     if(ctx.sleep_stages_len == 0) {
+        printf("info: No sleep stages configured. Default will be used.\n");
         init_default_sleep_stages(&ctx);
+    }
+
+    if(!ctx.wakeup_stage.valid) {
+        fprintf(stderr, "warning: No wakeup stage configured (via --wakeup)! Default will be used\n");
+        ctx.wakeup_stage.valid = true;
     }
 
     qsort(ctx.sleep_stages, ctx.sleep_stages_len, sizeof(SleepStage), _sort_compare_stages);
@@ -37,9 +49,11 @@ void print_help() {
     puts("Usage: sleeper [OPTION]...");
     puts("");
     puts("Available options:");
-    puts("  --help:     Shows this help");
-    puts("  --version:  Shows the program version");
-    puts("  --no-exec:  Do not execute any commands, only say what would be done.");
+    puts("  --help:                          Shows this help.");
+    puts("  --version:                       Shows the program version.");
+    puts("  --no-exec:                       Do not execute any commands, only say what would be done.");
+    puts("  --stage: <seconds> <OPTION>... : Adds a sleep stage.");
+    puts("      --command: <command>: Command to execute at the stage");
     puts("");
     puts("Source code and bugs:");
     puts("https://github.com/Wolfyxon/sleeper");
@@ -68,10 +82,65 @@ void parse_args(AppContext *ctx, int argc, char **argv) {
             ctx->verbose = true;
             continue;
         }
+
+        if(streq(arg, "--stage")) {
+            SleepStage new_stage = {0};
+
+            if(argc <= i + 3) {
+                fprintf(stderr, "error: --stage requires arguments: --stage <seconds> --command <command>\n");
+                exit(1);
+            }
+
+            char *time_str = argv[i + 1];
+            i += 1;
+
+            if(!strisint(time_str)) {
+                fprintf(stderr, "error: Not a valid number for --stage: '%s'\n", time_str);
+                exit(1);
+            }
+
+            int seconds = atoi(time_str);
+            
+            if(seconds <= 0) {
+                fprintf(stderr, "error: Seconds value for --stage must be greater than 0\n");
+                exit(1);
+            }
+
+            new_stage.time = seconds * 1000;
+            process_stage_args(&new_stage, &i, argc, argv);
+            add_sleep_stage(ctx, new_stage);
+            continue;
+        }
+
+        if(streq(arg, "--wakeup")) {
+            SleepStage wakeup_stage = {0};
+
+            process_stage_args(&wakeup_stage, &i, argc, argv);
+            continue;
+        }
         
         fprintf(stderr, "error: Unrecognized argument '%s'\n", arg);
         exit(1);
     }
+}
+
+void process_stage_args(SleepStage *stage, size_t *i_ptr, int argc, char **argv) {
+    if(argc <=  *i_ptr + 2) {
+        fprintf(stderr, "error: Stage options are required: --command <command>\n");
+        exit(1);
+    }
+
+    char *flag = argv[*i_ptr + 1];
+    char *command = argv[*i_ptr + 2];
+    
+    if(!streq(flag, "--command")) {
+        fprintf(stderr, "error: Unrecognized argument '%s'\n", flag);
+        exit(1);
+    }
+
+    stage->command = command;
+    
+    *i_ptr += 2;
 }
 
 void main_loop(AppContext *ctx) {
@@ -140,12 +209,22 @@ void add_sleep_stage(AppContext *ctx, SleepStage stage) {
         exit(1);
     }
 
+    stage.valid = true;
     ctx->sleep_stages[ctx->sleep_stages_len - 1] = stage;
 }
 
 void init_default_sleep_stages(AppContext *ctx) {
-    add_sleep_stage(ctx, (SleepStage){.time = 1000});
-    add_sleep_stage(ctx, (SleepStage){.time = 2000});
+    add_sleep_stage(ctx, (SleepStage){
+        .command = "brightnessctl --save set 1%",
+        .time = 1000
+    });
+
+    add_sleep_stage(ctx, (SleepStage){
+        .command = "xset s activate",
+        .time = 5000
+    });
+    
+    ctx->wakeup_stage.valid = true;
 }
 
 SleepStage *get_next_sleep_stage(AppContext *ctx) {
