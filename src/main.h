@@ -20,6 +20,7 @@ void print_help();
 void main_loop(AppContext *ctx);
 
 void timing_out(AppContext *ctx);
+void dry_interacted(AppContext *ctx);
 void interacted(AppContext *ctx);
 
 void exec_stage(AppContext *ctx, SleepStage *stage);

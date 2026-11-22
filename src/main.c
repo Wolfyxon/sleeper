@@ -185,20 +185,6 @@ void main_loop(AppContext *ctx) {
         return;
     }
 
-    if(x11_is_screen_off(&ctx->x11)) {
-        return;
-    }
-
-    if(!ctx->no_screensaver_check && x11_has_screensaver(&ctx->x11)) {
-        return;
-    }
-
-    if(!ctx->no_lockscreen_check && x11_has_lockscreen(&ctx->x11)) {
-        return;
-    }
-
-    millis_t now = get_time_ms();
-
     if(ctx->current_stage == NULL) {
         ctx->current_stage = get_next_sleep_stage(ctx);
     }
@@ -207,14 +193,31 @@ void main_loop(AppContext *ctx) {
         return;
     }
     
+    millis_t now = get_time_ms();
+
     if(now >= ctx->last_interaction + ctx->current_stage->time && ctx->last_stage != ctx->current_stage) {
         timing_out(ctx);
     }
 }
 
 void timing_out(AppContext *ctx) {
+    if(x11_is_screen_off(&ctx->x11)) {
+        dry_interacted(ctx);
+        return;
+    }
+
+    if(!ctx->no_screensaver_check && x11_has_screensaver(&ctx->x11)) {
+        dry_interacted(ctx);
+        return;
+    }
+
+    if(!ctx->no_lockscreen_check && x11_has_lockscreen(&ctx->x11)) {
+        dry_interacted(ctx);
+        return;
+    }
+
     if(!ctx->no_video_check && has_blocking_media_player()) {
-        interacted(ctx);
+        dry_interacted(ctx);
         return;
     }
 
@@ -222,8 +225,12 @@ void timing_out(AppContext *ctx) {
     ctx->current_stage = get_next_sleep_stage(ctx);
 }
 
-void interacted(AppContext *ctx) {
+void dry_interacted(AppContext *ctx) {
     ctx->last_interaction = get_time_ms();
+}
+
+void interacted(AppContext *ctx) {
+    dry_interacted(ctx);
 
     if(ctx->last_stage != &ctx->wakeup_stage) {
         if(ctx->verbose) {

@@ -71,26 +71,6 @@ bool x11_has_interacted(X11Context *ctx) {
     return res;
 }
 
-bool x11_is_window_fullscreen(X11Context *ctx, Window w) {
-    Window root = DefaultRootWindow(ctx->disp);
-
-    XWindowAttributes root_attr = {0};
-    XWindowAttributes attr = {0};
-    
-    if(XGetWindowAttributes(ctx->disp, root, &root_attr) == 0) {
-        return false;
-    }
-
-    if(XGetWindowAttributes(ctx->disp, w, &attr) == 0) {
-        return false;
-    }
-
-    if(attr.height == root_attr.height) {
-        return true;
-    }
-
-    return false;
-}
 
 bool x11_has_screensaver(X11Context *ctx) {
     XScreenSaverInfo *info = XScreenSaverAllocInfo();
@@ -112,11 +92,10 @@ bool x11_has_screensaver(X11Context *ctx) {
 
 bool x11_has_lockscreen(X11Context *ctx) {
     Window root = XDefaultRootWindow(ctx->disp);
+    Window parent = {0};
 
-    Window parent;
-
-    Window *windows;
-    unsigned int windows_len;
+    Window *windows = NULL;
+    unsigned int windows_len = 0;
 
     int status = XQueryTree(
         ctx->disp, 
@@ -137,6 +116,13 @@ bool x11_has_lockscreen(X11Context *ctx) {
         return false;
     }
 
+    XWindowAttributes root_attr = {0};
+
+    if(XGetWindowAttributes(ctx->disp, root, &root_attr) == 0) {
+        fprintf(stderr, "error: Failed to get attributes of root window\n");
+        return false;
+    }
+
     for(size_t i = 0; i < windows_len; i++) {
         XWindowAttributes attr = {0};
         Window window = windows[i];
@@ -147,18 +133,16 @@ bool x11_has_lockscreen(X11Context *ctx) {
             continue;
         }
 
-        if(!x11_is_window_fullscreen(ctx, window)) {
-            continue;
-        }
-        if(attr.map_state != IsViewable) {
+        if(
+            attr.map_state != IsViewable ||
+            !attr.override_redirect ||
+            !attr.map_installed
+        ) {
             continue;
         } 
 
-        if(!attr.override_redirect) {
-            continue;
-        }
-
-        if(!attr.map_installed) {
+        // Fullscreen check
+        if(attr.height != root_attr.height && attr.width != root_attr.width) {
             continue;
         }
 
@@ -167,7 +151,6 @@ bool x11_has_lockscreen(X11Context *ctx) {
     }
 
     XFree(windows);
-
     return false;
 }
 
