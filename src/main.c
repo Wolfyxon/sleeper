@@ -49,11 +49,14 @@ void print_help() {
     puts("Usage: sleeper [OPTION]...");
     puts("");
     puts("Available options:");
-    puts("  --help:                          Shows this help.");
-    puts("  --version:                       Shows the program version.");
-    puts("  --no-exec:                       Do not execute any commands, only say what would be done.");
-    puts("  --stage: <seconds> <OPTION>... : Adds a sleep stage.");
-    puts("      --command: <command>: Command to execute at the stage");
+    puts("  --help:                                 Shows this help.");
+    puts("  --version:                              Shows the program version.");
+    puts("  --no-exec:                              Do not execute any commands, only say what would be done.");
+    puts("  --stage: <seconds> <STAGE OPTION>...  : Adds a sleep stage.");
+    puts("  --wakeup: <seconds> <STAGE OPTION>... : Adds a wakeup stage.");
+    puts("");
+    puts("Stage options (for --stage and --wakeup)");
+    puts("  --command: <command>: Command to execute");
     puts("");
     puts("Source code and bugs:");
     puts("https://github.com/Wolfyxon/sleeper");
@@ -160,7 +163,7 @@ void main_loop(AppContext *ctx) {
     if(x11_has_lockscreen(&ctx->x11)) {
         return;
     }
-    
+
     millis_t now = get_time_ms();
 
     if(ctx->current_stage == NULL) {
