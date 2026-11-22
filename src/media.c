@@ -2,6 +2,8 @@
 
 const char *VIDEO_PATTERNS[] = {
     ".*.mp4", ".*.mov", ".*.webm",
+    ".*.mkv", ".*.mpv",".*.ogv",
+    ".*.avi", ".*.flv", ".*.vob",
     "https://.*/watch.*"
 };
 
