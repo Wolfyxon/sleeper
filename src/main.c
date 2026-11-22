@@ -37,6 +37,10 @@ int main(int argc, char **argv) {
 
     x11_init(&ctx.x11);
 
+    if(ctx.verbose) {
+        puts("info: Running");
+    }
+
     while(1) {
         main_loop(&ctx);
         usleep(FRAME_TIME);
