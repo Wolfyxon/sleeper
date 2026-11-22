@@ -11,7 +11,7 @@
 #include "tests.h"
 #endif
 
-#define FRAME_TIME 8000
+#define FRAME_TIME (1000 * 100)
 
 int main(int argc, char **argv);
 void parse_args(AppContext *ctx, int argc, char **argv);
