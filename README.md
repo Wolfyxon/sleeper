@@ -12,7 +12,7 @@ Features:
 ```
 sleeper \
 --stage 30 --command "brightnessctl s --save 10%" \
---stage 60 --command "brightnessctl s --save 1%" \
+--stage 60 --command "brightnessctl s 1%" \
 --stage 120 --command "your-lockscreen-command" \
 --wakeup --command "brightnessctl --restore"
 ```
