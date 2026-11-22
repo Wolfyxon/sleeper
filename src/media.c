@@ -5,6 +5,7 @@ const char *VIDEO_PATTERNS[] = {
     ".*.mkv", ".*.mpv",".*.ogv",
     ".*.avi", ".*.flv", ".*.vob",
     "https://.*/watch.*",
+    "https://.*youtube.com/.*",
     "https://.*netflix.com/.*",
     "https://.*hbomax.com/.*",
     "https://.*primevideo.com/.*",
