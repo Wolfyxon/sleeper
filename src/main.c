@@ -21,6 +21,7 @@ int main(int argc, char **argv) {
     }
 
     parse_args(&ctx, argc, argv);
+    init_tty(&ctx);
 
     if(ctx.sleep_stages_len == 0) {
         printf("info: No sleep stages configured. Default will be used:\n");
@@ -70,6 +71,7 @@ void print_help() {
     puts("  --no-video-check:                       Do not check for active video players (via playerctl)");
     puts("  --no-lockscreen-check:                  Do not check for an active lockscreen app");
     puts("  --no-screensaver-check:                 Do not check for an active screensaver app");
+    puts("  --no-tty-check:                         Do not check if switched to console mode or other graphical session.");
     puts("  --check-fullscreen:                     Check for fullscreen apps");
     puts("  --stage: <seconds> <STAGE OPTION>...  : Adds a sleep stage.");
     puts("  --wakeup: <seconds> <STAGE OPTION>... : Adds a wakeup stage.");
@@ -112,6 +114,11 @@ void parse_args(AppContext *ctx, int argc, char **argv) {
 
         if(streq(arg, "--no-screensaver-check")) {
             ctx->no_screensaver_check = true;
+            continue;
+        }
+
+        if(streq(arg, "--no-tty-check")) {
+            ctx->no_tty_check = true;
             continue;
         }
 
@@ -188,6 +195,11 @@ void process_stage_args(SleepStage *stage, size_t *i_ptr, int argc, char **argv)
 }
 
 void main_loop(AppContext *ctx) {
+    if(!ctx->no_tty_check && !is_active_tty(ctx)) {
+        dry_interacted(ctx);
+        return;
+    }
+    
     if(x11_has_interacted(&ctx->x11)) {
         interacted(ctx);
         return;

@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "global.h"
+#include "sys.h"
 #include "media.h"
 #include "x11.h"
 
