@@ -117,8 +117,10 @@ void parse_args(AppContext *ctx, int argc, char **argv) {
 
         if(streq(arg, "--wakeup")) {
             SleepStage wakeup_stage = {0};
+            wakeup_stage.valid = true;
 
             process_stage_args(&wakeup_stage, &i, argc, argv);
+            ctx->wakeup_stage = wakeup_stage;
             continue;
         }
         
