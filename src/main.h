@@ -26,5 +26,6 @@ void interacted(AppContext *ctx);
 void exec_stage(AppContext *ctx, SleepStage *stage);
 void add_sleep_stage(AppContext *ctx, SleepStage stage);
 void init_default_sleep_stages(AppContext *ctx);
+void check_duplicate_stages(AppContext *ctx);
 SleepStage *get_next_sleep_stage(AppContext *ctx);
 int _sort_compare_stages(const void* a, const void* b);

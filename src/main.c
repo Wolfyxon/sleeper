@@ -35,6 +35,8 @@ int main(int argc, char **argv) {
         printf("  wakeup: %s\n\n", ctx.wakeup_stage.command);
     }
 
+    check_duplicate_stages(&ctx);
+
     if(!ctx.wakeup_stage.valid) {
         fprintf(stderr, "warning: No wakeup stage configured (via --wakeup)! Default will be used:\n");
         fprintf(stderr, "%s\n", ctx.wakeup_stage.command);
@@ -280,6 +282,24 @@ void init_default_sleep_stages(AppContext *ctx) {
     });
     
     ctx->wakeup_stage.valid = true;
+}
+
+void check_duplicate_stages(AppContext *ctx) {
+    for(size_t i = 0; i < ctx->sleep_stages_len; i++) {
+        for(size_t j = 0; j < ctx->sleep_stages_len; j++) {
+            if(i == j) {
+                continue;
+            }
+
+            if(ctx->sleep_stages[i].time == ctx->sleep_stages[j].time) {
+                fprintf(
+                    stderr, 
+                    "error: Multiple stages cannot run at the same time. Use 'command1 && command2' if you want to chain commands.\n"
+                );
+                exit(1);
+            }
+        }   
+    }
 }
 
 SleepStage *get_next_sleep_stage(AppContext *ctx) {
