@@ -23,12 +23,21 @@ int main(int argc, char **argv) {
     parse_args(&ctx, argc, argv);
 
     if(ctx.sleep_stages_len == 0) {
-        printf("info: No sleep stages configured. Default will be used.\n");
+        printf("info: No sleep stages configured. Default will be used:\n");
         init_default_sleep_stages(&ctx);
+
+        for(size_t i = 0; i < ctx.sleep_stages_len; i++) {
+            SleepStage stage = ctx.sleep_stages[i];
+
+            printf("  %lds: %s\n", stage.time / 1000, stage.command);
+        }
+
+        printf("  wakeup: %s\n\n", ctx.wakeup_stage.command);
     }
 
     if(!ctx.wakeup_stage.valid) {
-        fprintf(stderr, "warning: No wakeup stage configured (via --wakeup)! Default will be used\n");
+        fprintf(stderr, "warning: No wakeup stage configured (via --wakeup)! Default will be used:\n");
+        fprintf(stderr, "%s\n", ctx.wakeup_stage.command);
         ctx.wakeup_stage.valid = true;
     }
 
