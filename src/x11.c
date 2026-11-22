@@ -27,7 +27,7 @@ void x11_init(X11Context *ctx) {
 
     XISetMask(mask_data, XI_KeyPress);
     XISetMask(mask_data, XI_KeyRelease);
-    XISetMask(mask_data, XI_Motion);
+    XISetMask(mask_data, XI_RawMotion);
     
     mask.deviceid = XIAllDevices;
     mask.mask_len = sizeof(mask_data);
