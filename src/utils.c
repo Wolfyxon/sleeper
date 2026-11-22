@@ -39,6 +39,27 @@ bool strstarts(const char *str, const char *prefix) {
     return strncmp(str, prefix, strlen(prefix)) == 0;
 }
 
+bool strisint(const char *str) {
+    if(str == NULL) {
+        fprintf(stderr, "error: strisint(): str is NULL");
+        return false;
+    }
+
+    size_t len = strlen(str);
+
+    if(len == 0) {
+        return false;
+    }
+
+    for(size_t i = 0; i < len; i++) {
+        if(!isdigit(str[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 millis_t get_time_ms() {
     struct timeval time;
     gettimeofday(&time, NULL);
