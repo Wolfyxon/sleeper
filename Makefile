@@ -1,11 +1,12 @@
 OUT_NAME := sleeper
+VERSION := 1.0
 
 CC := gcc
 SOURCES := src/*.h src/*.c
 
 LIBS := x11 xi xext playerctl glib-2.0 gobject-2.0
 LIB_CFLAGS := $(shell pkg-config --cflags --libs $(LIBS))
-CFLAGS := -Wall -Os $(LIB_CFLAGS) -DPROGRAM_VERSION='\"1.0\"' $(CFLAGS)
+CFLAGS := -Wall -Os $(LIB_CFLAGS) -DPROGRAM_VERSION=\"$(VERSION)\" $(CFLAGS)
 FLAGS_TXT_FILE := compile_flags.txt
 
 .PHONY: build dev test clean
