@@ -72,7 +72,8 @@ void print_help() {
     puts("  --no-lockscreen-check:                  Do not check for an active lockscreen app");
     puts("  --no-screensaver-check:                 Do not check for an active screensaver app");
     puts("  --no-tty-check:                         Do not check if switched to console mode or other graphical session.");
-    puts("  --check-fullscreen:                     Check for fullscreen apps");
+    puts("  --check-fullscreen:                     Check for fullscreen apps.");
+    puts("  --media-url-regex: <regex>              Custom regex pattern for checking playerctl URLs.");
     puts("  --stage: <seconds> <STAGE OPTION>...  : Adds a sleep stage.");
     puts("  --wakeup: <seconds> <STAGE OPTION>... : Adds a wakeup stage.");
     puts("");
@@ -124,6 +125,31 @@ void parse_args(AppContext *ctx, int argc, char **argv) {
 
         if(streq(arg, "--check-fullscreen")) {
             ctx->check_fullscreen = true;
+            continue;
+        }
+
+        if(streq(arg, "--media-url-regex")) {
+            if(argc <= i + 1) {
+                fprintf(stderr, "error: --media-url-regex requires an argument\n");
+                exit(1);
+            }
+
+            char *pat = argv[i + 1];
+            int res = regcomp(&ctx->playerctl_url_regex, pat, 0);
+            
+            if(res != REG_NOERROR) {
+                char err_str[256] = {0};
+
+                regerror(res, &ctx->playerctl_url_regex, err_str, sizeof(err_str));
+                err_str[sizeof(err_str) - 1] = '\0';
+
+                fprintf(stderr, "error: --media-url-regex: %s\n", err_str);
+                exit(1);
+            }
+
+            ctx->has_playerctl_url_regex = true;
+
+            i++;
             continue;
         }
 
@@ -226,7 +252,7 @@ void timing_out(AppContext *ctx) {
         return;
     }
 
-    if(!ctx->no_video_check && has_blocking_media_player()) {
+    if(has_blocking_media_player(ctx)) {
         dry_interacted(ctx);
         return;
     }

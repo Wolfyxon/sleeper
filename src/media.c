@@ -16,8 +16,8 @@ const char *VIDEO_PATTERNS[] = {
     "https://.*crunchyroll.com/.*"
 };
 
-bool has_blocking_media_player() {
-    PlayerctlPlayer *pctl_player = get_blocking_playerctl();
+bool has_blocking_media_player(AppContext *ctx) {
+    PlayerctlPlayer *pctl_player = get_blocking_playerctl(ctx);
 
     if(pctl_player != NULL) {
         g_object_unref(pctl_player);
@@ -45,7 +45,7 @@ bool is_video_url(const char *url) {
     return false;
 }
 
-PlayerctlPlayer *get_blocking_playerctl() {
+PlayerctlPlayer *get_blocking_playerctl(AppContext *ctx) {
     GError *list_err = NULL;
     GList *players = playerctl_list_players(&list_err);
 
@@ -66,7 +66,7 @@ PlayerctlPlayer *get_blocking_playerctl() {
             continue;
         }
 
-        if(is_blocking_playerctl(player)) {
+        if(is_blocking_playerctl(ctx, player)) {
             return player;
         }
 
@@ -76,7 +76,7 @@ PlayerctlPlayer *get_blocking_playerctl() {
     return NULL;
 }
 
-bool is_blocking_playerctl(PlayerctlPlayer *player) {
+bool is_blocking_playerctl(AppContext *ctx, PlayerctlPlayer *player) {
     if(player == NULL) {
         fprintf(stderr, "error: is_blocking_playerctl(): player is NULL\n");
         return false;
@@ -99,6 +99,15 @@ bool is_blocking_playerctl(PlayerctlPlayer *player) {
         return false;
     }
 
+    if(ctx->has_playerctl_url_regex) {
+        int match_res = regexec(&ctx->playerctl_url_regex,  url, 0, NULL, 0);
+
+        if(match_res == 0) {
+            g_free(url);
+            return true;
+        }
+    }
+    
     if(is_video_url(url)) {
         g_free(url);
         return true;

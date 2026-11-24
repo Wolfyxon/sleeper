@@ -7,9 +7,11 @@
 #include <glib-object.h>
 #include <playerctl/playerctl.h>
 
-bool has_blocking_media_player();
+#include "global.h"
+
+bool has_blocking_media_player(AppContext *ctx);
 bool is_video_url(const char *url);
 
-PlayerctlPlayer *get_blocking_playerctl();
-bool is_blocking_playerctl(PlayerctlPlayer *player);
+PlayerctlPlayer *get_blocking_playerctl(AppContext *ctx);
+bool is_blocking_playerctl(AppContext *ctx, PlayerctlPlayer *player);
 bool is_playerctl_playing(PlayerctlPlayer *player);
