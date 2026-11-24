@@ -80,6 +80,12 @@ void print_help() {
     puts("Stage options (for --stage and --wakeup)");
     puts("  --command: <command>: Command to execute");
     puts("");
+    puts("Example usage:");
+    puts("  sleeper \\");
+    puts("  --stage 60 --command 'backlightctl s 1%'");
+    puts("  --stage 120 --command 'your-lockscreen-command'");
+    puts("  --media-url-regex 'https://example.com/.*|https://example.org/.*'");
+    puts("");
     puts("Source code and bugs:");
     puts("https://github.com/Wolfyxon/sleeper");
 }
