@@ -73,6 +73,7 @@ void print_help() {
     puts("  --no-screensaver-check:                 Do not check for an active screensaver app");
     puts("  --no-tty-check:                         Do not check if switched to console mode or other graphical session.");
     puts("  --check-fullscreen:                     Check for fullscreen apps.");
+    puts("  --check-command <command>:              Check a custom command. Use exit code other than 0 to prevent sleeping.");
     puts("  --media-url-regex: <regex>              Custom regex pattern for checking playerctl URLs.");
     puts("  --stage: <seconds> <STAGE OPTION>...  : Adds a sleep stage.");
     puts("  --wakeup: <seconds> <STAGE OPTION>... : Adds a wakeup stage.");
@@ -131,6 +132,23 @@ void parse_args(AppContext *ctx, int argc, char **argv) {
 
         if(streq(arg, "--check-fullscreen")) {
             ctx->check_fullscreen = true;
+            continue;
+        }
+
+        if(streq(arg, "--check-command")) {
+            if(argc <= i + 1) {
+                fprintf(stderr, "error: --check-command requires an argument\n");
+                exit(1);
+            }
+
+            if(ctx->check_command != NULL) {
+                fprintf(stderr, "error: Custom check command is already set\n");
+                exit(1);
+            }
+
+            ctx->check_command = argv[i + 1];
+
+            i++;
             continue;
         }
 
@@ -252,6 +270,34 @@ void main_loop(AppContext *ctx) {
     }
 }
 
+bool check_custom_command(AppContext *ctx) {
+    if(ctx->check_command == NULL) {
+        return false;
+    }
+
+    if(ctx->check_command[0] == '\0') {
+        return false;
+    }
+
+    if(ctx->verbose) {
+        printf("info: Executing %s\n", ctx->check_command);
+    }
+
+    int code = system(ctx->check_command);
+
+    if(ctx->verbose) {
+        printf("info: Exit code: %d. ", code);
+
+        if(code == 0) {
+            printf("Blocking sleep.\n");
+        } else {
+            printf("Not blocking sleep.\n");
+        }
+    }
+
+    return code == 0;
+}
+
 void timing_out(AppContext *ctx) {
     if(x11_is_screen_off(&ctx->x11)) {
         dry_interacted(ctx);
@@ -274,6 +320,11 @@ void timing_out(AppContext *ctx) {
     }
 
     if(ctx->check_fullscreen && x11_has_fullscreen(&ctx->x11)) {
+        dry_interacted(ctx);
+        return;
+    }
+
+    if(check_custom_command(ctx)) {
         dry_interacted(ctx);
         return;
     }

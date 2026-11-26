@@ -21,6 +21,7 @@ void process_stage_args(SleepStage *stage, size_t *i, int argc, char **argv);
 void print_help();
 void main_loop(AppContext *ctx);
 
+bool check_custom_command(AppContext *ctx);
 void timing_out(AppContext *ctx);
 void dry_interacted(AppContext *ctx);
 void interacted(AppContext *ctx);

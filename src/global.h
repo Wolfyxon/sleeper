@@ -27,6 +27,7 @@ typedef struct {
     bool no_screensaver_check;
     bool no_tty_check;
     bool check_fullscreen;
+    char *check_command;
 
     regex_t playerctl_url_regex;
     bool has_playerctl_url_regex;
