@@ -1,4 +1,5 @@
 *.sig
+*.fuse_hidden*
 
 compile_flags.txt
 sleeper
